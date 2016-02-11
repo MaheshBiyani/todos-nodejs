@@ -75,9 +75,6 @@ app.get('/todos', function(req, res) {
 
 	var queryParams = req.query;
 	var where = {} ;
-
-	
-
 	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
 			where.completed=true;
 
@@ -107,19 +104,6 @@ app.post('/todos', function(req, resp) {
 	}).catch(function (err){
 		resp.status(400).json(err);
 	})
-
-
-/*	if (!_.isBoolean(body.completed) || !_.isString(body.description) || body.description.trim().length === 0) {
-
-		resp.status(404).send();
-	}
-	body.description = body.description.trim();
-
-	body.id = idIncrement++;
-
-	todos.push(body);
-
-	resp.send(body);*/
 })
 
 app.listen(PORT, function() {
@@ -128,7 +112,26 @@ app.listen(PORT, function() {
 
 app.delete('/todos/:id', function(req, resp) {
 	var todoId = parseInt(req.params.id);
-	var matchedTodo = _.findWhere(todos, {
+
+	db.todo.destroy({
+		where :{
+			id :todoId
+		}
+	}). then (function (number){
+		if (number===0){
+			resp.status(404).json({
+				error : 'no to do with id'
+			})
+		}
+		else {
+			console.log("Deleted number of rows are "+ number);	
+			resp.send(200).send();			
+		}
+		
+	}, function (e){
+		resp.send(404);
+	});
+	/*var matchedTodo = _.findWhere(todos, {
 		id: todoId
 	});
 	if (matchedTodo) {
@@ -136,7 +139,7 @@ app.delete('/todos/:id', function(req, resp) {
 		resp.send(matchedTodo);
 	} else {
 		resp.status(404).send();
-	}
+	}*/
 
 })
 
