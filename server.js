@@ -21,23 +21,35 @@ app.get('/', function(req, res) {
 app.get('/todos/:id', function(req, res) {
 
 	var todoId = parseInt(req.params.id);
-	var matchedTodo = _.findWhere(todos, {
+
+	db.todo.findById(todoId).then(function (todo){
+		console.log('added');
+		console.log(todo);
+		if (!todo){
+			return res.status(404).send();	
+		}
+		res.json(todo);
+	}, function (error){
+		resp.status(500).json(error);
+	})
+
+	/*var matchedTodo = _.findWhere(todos, {
 		id: todoId
 	});
 
-	/*todos.forEach(function (todo){
+	todos.forEach(function (todo){
 		
 		if (todoId===todo.id){
 	
 			matchedTodo=todo;
 		}
-	});*/
+	});
 	if (matchedTodo) {
 		res.json(matchedTodo);
 
 	} else {
 		res.status(404).send();
-	}
+	}*/
 
 });
 
