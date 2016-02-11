@@ -146,34 +146,30 @@ app.delete('/todos/:id', function(req, resp) {
 app.put('/todos/:id', function(req, resp) {
 	console.log('put method');
 	var body = _.pick(req.body, 'description', 'completed');
-	var validAttributes = {};
+	var attributes = {};
 
 	var todoId = parseInt(req.params.id);
-	var matchedTodo = _.findWhere(todos, {
-		id: todoId
+	
+	
+	if (body.hasOwnProperty('completed') ) {
+		attributes.completed = body.completed;
+	} 
+	if (body.hasOwnProperty('description') ) {
+		attributes.description = body.description;
+	} 
+
+	db.todo.findById(todoId).then(function(todo){
+		if (todo) {
+			todo.update(attributes);
+			return resp.json(todo);
+		} else{
+			return resp.status(404).send();
+		}
+	}, function(e){
+		resp.status(500).send();
 	});
-	if (!matchedTodo) {
-		return resp.status(404).send();
-	}
-
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
-		validAttributes.completed = body.completed;
-	} else if (body.hasOwnProperty('completed')) {
-
-		return resp.status(404).send();
-	}
-
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
-		validAttributes.description = body.description;
-	} else if (body.hasOwnProperty('description')) {
-		console.log('description');
-		return resp.status(404).send();
-
-	}
-
-	matchedTodo = _.extend(matchedTodo, validAttributes);
-	resp.json(matchedTodo);
-	//resp.send(matchedTodo);
+	
+	
 	
 })
 
