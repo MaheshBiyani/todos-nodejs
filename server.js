@@ -173,4 +173,14 @@ app.put('/todos/:id', function(req, resp) {
 	
 })
 
+app.post('/user' , function (req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+	db.user.create(body).then(function(user){
+			console.log('cretaed user');
+			res.json(user.toJSON());
+	}).catch(function (err){
+		res.status(400).json(err);
+	})
+})
+
 db.sequelize.sync().then
