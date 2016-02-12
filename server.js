@@ -165,15 +165,28 @@ app.post('/user' , function (req, res) {
 app.post('/user/login', function (req, res){
 	console.log("user login block");
 	var body = _.pick( req.body, 'email', 'password');
-
+	var userInstance ;
 	db.user.authenticate(body).then(function (user){
-		res.header('Auth', user.generateToken('authenticattion')).json(user.toPublicJson());
-	}, function (error){
+		var token = user.generateToken('authenticattion');
+		userInstance =user;
+		return db.token.create({
+			token : token
+		});
+	}).then(function(tokenInstance){
+		res.header('Auth', tokenInstance.token).json(userInstance.toPublicJson());
+	}).catch(function (error){
 		console.log(error);
 		res.status(404).send();
 	});
+});
 
-	
+app.delete('/users/login',middleware.requireAuthentication, function (req, res){
+	req.token.destroy().then(function(){
+		res.status(200).send();
+	}).catch(function (error){
+		res.status(404).send();
+	});
+
 });
 
 
@@ -194,6 +207,4 @@ app.post('/user/login', function (req, res){
 
 
 
-
-
-db.sequelize.sync().then
+db.sequelize.sync({force: true}).then
