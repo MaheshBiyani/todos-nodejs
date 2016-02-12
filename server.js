@@ -1,6 +1,8 @@
 var express = require('express');
 var bodyParser = require('body-parser')
 var _ = require('underscore');
+var bcrypt = require('bcryptjs');
+
 var db = require('./db.js');
 
 var idIncrement = 1;
@@ -8,16 +10,14 @@ var app = express();
 var PORT = process.env.PORT || 3000;
 var todos = [];
 
+
 app.use(bodyParser.json());
 
 app.get('/', function(req, res) {
 	res.send('To do API root');
 })
 
-/*app.get('/todos' , function ( req, resp) {
-	resp.json(todos);
-});
-*/
+
 app.get('/todos/:id', function(req, res) {
 
 	var todoId = parseInt(req.params.id);
@@ -33,44 +33,10 @@ app.get('/todos/:id', function(req, res) {
 		resp.status(500).json(error);
 	})
 
-	/*var matchedTodo = _.findWhere(todos, {
-		id: todoId
-	});
-
-	todos.forEach(function (todo){
-		
-		if (todoId===todo.id){
 	
-			matchedTodo=todo;
-		}
-	});
-	if (matchedTodo) {
-		res.json(matchedTodo);
-
-	} else {
-		res.status(404).send();
-	}*/
-
 });
 
 
-/*app.get('/todos', function (req , res) {
-
-	var queryParams = req.query;
-	var filteredTodos = todos;
-	
-	if (queryParams.hasOwnProperty('completed') && queryParams.completed==='true'){
-		filteredTodos=_.where(filteredTodos ,{completed : true});
-		console.log(filteredTodos);	
-	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed==='false') {
-		
-		filteredTodos = _.where (filteredTodos ,{completed : false});
-		console.log(filteredTodos);
-
-	}
-	res.json(filteredTodos);
-})
-*/
 app.get('/todos', function(req, res) {
 
 	var queryParams = req.query;
@@ -131,16 +97,7 @@ app.delete('/todos/:id', function(req, resp) {
 	}, function (e){
 		resp.send(404);
 	});
-	/*var matchedTodo = _.findWhere(todos, {
-		id: todoId
-	});
-	if (matchedTodo) {
-		todos = _.without(todos, matchedTodo);
-		resp.send(matchedTodo);
-	} else {
-		resp.status(404).send();
-	}*/
-
+	
 })
 
 app.put('/todos/:id', function(req, resp) {
@@ -188,6 +145,19 @@ app.post('/user' , function (req, res) {
 
 
 
+app.post('/user/login', function (req, res){
+	console.log("user login block");
+	var body = _.pick( req.body, 'email', 'password');
+
+	db.user.authenticate(body).then(function (user){
+		res.send(user.toPublicJson());
+	}, function (error){
+		console.log(error);
+		res.status(404).send();
+	});
+
+	
+});
 
 
 
