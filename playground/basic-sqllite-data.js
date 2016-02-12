@@ -1,56 +1,58 @@
 var Sequelize = require('sequelize');
 
-var sequelize = new Sequelize(undefined, undefined , undefined,{
-	'dialect':'sqlite',
-	'storage': __dirname +'/basic-sqlite-database.sqlite'
+var sequelize = new Sequelize(undefined, undefined, undefined, {
+	'dialect': 'sqlite',
+	'storage': __dirname + '/basic-sqlite-database.sqlite'
 });
 
-var Todo = sequelize.define('todo',{
-	description :{
-		type : Sequelize.STRING,
-		allowNull : false,
-		validate :{
-			len: [1,250]
+var Todo = sequelize.define('todo', {
+	description: {
+		type: Sequelize.STRING,
+		allowNull: false,
+		validate: {
+			len: [1, 250]
 		}
 	},
-	completed : {
-		type :Sequelize.BOOLEAN,
-		allowNull : false,
-		defaultValue : false
+	completed: {
+		type: Sequelize.BOOLEAN,
+		allowNull: false,
+		defaultValue: false
 
 	}
 })
 
-sequelize.sync({force : true}).then(function(){
+var User = sequelize.define('user', {
+	email: Sequelize.STRING,		
+});
+
+Todo.belongsTo(User);
+User.hasMany(Todo);
+
+sequelize.sync({
+	//force: true
+}).then(function() {
 	console.log("Everything is synced");
-	Todo.create({
-		description : 'Walking my dog' 
-		
-	}).then( function (todo) {
-		return Todo.create({
-			description : 'Clean office'
-		})
 
-	}).then(function (){
-		//return Todo.findById(1)
-		return Todo.findAll({
+	User.findById(1).then(function (user){
+		user.getTodos({
 			where :{
-				description:{
-					$like :'%dog%'
-				}
+				completed : false
 			}
-		})
-	}).then(function(todos){
-		if (todos){
-			todos.forEach(function(todo){
-				console.log(todo.toJSON());	
+		}).then(function (todo){
+			todo.forEach(function (todo){
+				console.log(todo.toJSON());
 			})
-			
-
-		}else {
-			console.log('no data found');			
-		}
-	}).catch(function (e){
-		console.log(e);
-	});
+		})
+	})
+	/*User.create({
+		email :'unimahes@gmail.com'
+	}).then(function(){
+		return Todo.create({
+			description :'clean yard'
+		})
+	}).then(function (todo) {
+		User.findById(1).then(function (user){
+			user.addTodo(todo);
+		})
+	})*/
 })
