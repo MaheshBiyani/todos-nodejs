@@ -135,7 +135,7 @@ app.post('/user' , function (req, res) {
 	var body = _.pick(req.body, 'email', 'password');
 	db.user.create(body).then(function(user){
 			console.log('cretaed user');
-			res.json(user.toPublicJson());
+			res.send(user.toPublicJson());
 	}).catch(function (err){
 		console.log(err);
 		res.status(400).json(err);
@@ -150,7 +150,7 @@ app.post('/user/login', function (req, res){
 	var body = _.pick( req.body, 'email', 'password');
 
 	db.user.authenticate(body).then(function (user){
-		res.send(user.toPublicJson());
+		res.header('Auth', user.generateToken('authenticattion')).json(user.toPublicJson());
 	}, function (error){
 		console.log(error);
 		res.status(404).send();
